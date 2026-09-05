@@ -368,69 +368,42 @@ tbody tr:hover { background: var(--fondo-alt); }
 .caritas-grupo input[value="neutral"]:checked + label { background: #faf3d9; }
 .caritas-grupo input[value="triste"]:checked + label  { background: #fbe6e6; }
 
-.extra-wrap {
-    margin-top: 8px;
-    min-height: 22px;
+.celda-calificacion {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 30px;
 }
 
-.extra-wrap [hidden] {
+.celda-calificacion [hidden] {
     display: none !important;
 }
 
-.btn-extra-toggle {
-    width: 20px;
-    height: 20px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: 1px dashed var(--borde);
-    background: transparent;
-    color: var(--texto-suave);
-    font-size: 12px;
-    line-height: 1;
-    opacity: .6;
-    cursor: pointer;
-    -webkit-user-select: none;
-    user-select: none;
-    transition: background .15s ease, color .15s ease, border-color .15s ease, opacity .15s ease;
-}
-
-.btn-extra-toggle:hover {
-    background: var(--teal-suave);
-    border-color: var(--teal);
-    border-style: solid;
-    color: var(--teal-oscuro);
-    opacity: 1;
-}
-
 .extra-valor {
-    display: inline-flex;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--vino-oscuro);
-    background: var(--vino-suave);
+    border: none;
     border-radius: 999px;
-    padding: 3px 10px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
     cursor: pointer;
     -webkit-user-select: none;
     user-select: none;
+    transition: filter .15s ease;
+}
+
+.extra-valor.extra-positivo {
+    background: #e3f6e8;
+    color: #2f7a45;
+}
+
+.extra-valor.extra-negativo {
+    background: #fbe6e6;
+    color: #a33636;
 }
 
 .extra-valor:hover {
-    filter: brightness(0.96);
-}
-
-.input-extra {
-    width: 52px;
-    text-align: center;
-    padding: 5px 4px;
-    font-size: 12px;
-    border-radius: 8px;
+    filter: brightness(0.95);
 }
 
 .leyenda-caritas {
@@ -479,6 +452,16 @@ tbody tr:hover { background: var(--fondo-alt); }
     font-size: 22px;
     cursor: pointer;
     color: var(--texto-suave);
+}
+
+.modal-caja-chica {
+    max-width: 360px;
+}
+
+.modal-extra-ayuda {
+    color: var(--texto-suave);
+    font-size: 13px;
+    margin: -6px 0 18px;
 }
 
 .checkbox-cargos {

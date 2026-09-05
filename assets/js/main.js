@@ -40,11 +40,15 @@ function cerrarModalNina() {
     if (modal) modal.classList.remove('abierto');
 }
 
-// Cierra el modal si se hace clic fuera de la caja
+// Cierra los modales si se hace clic fuera de la caja
 document.addEventListener('click', function (e) {
-    const modal = document.getElementById('modal-nina');
-    if (modal && e.target === modal) {
+    const modalNina = document.getElementById('modal-nina');
+    if (modalNina && e.target === modalNina) {
         cerrarModalNina();
+    }
+    const modalExtra = document.getElementById('modal-extra');
+    if (modalExtra && e.target === modalExtra) {
+        cerrarModalExtra();
     }
 });
 
@@ -65,50 +69,114 @@ function mostrarEdadCalculada() {
     salida.textContent = edad >= 0 ? ('Edad actual: ' + edad + ' años') : '';
 }
 
-/* ------------------------------- Planilla: añadido plegable (+) ------------------------------ */
+/* ------------------------------- Planilla: puntos extra vía modal ------------------------------ */
+let extraContexto = null; // { grupo, input, badge, signo }
+
 function inicializarExtras() {
-    document.querySelectorAll('[data-extra-wrap]').forEach(wrap => {
-        const boton = wrap.querySelector('[data-extra-toggle]');
-        const input = wrap.querySelector('[data-extra]');
-        const valor = wrap.querySelector('[data-extra-valor]');
-        if (!boton || !input || !valor) return;
+    document.querySelectorAll('[data-celda][data-tiene-extra="1"]').forEach(celda => {
+        const grupo = celda.querySelector('[data-grupo-carita]');
+        const input = celda.querySelector('[data-extra]');
+        const badge = celda.querySelector('[data-extra-valor]');
+        if (!grupo || !input || !badge) return;
 
-        function mostrarSegunValor() {
-            const n = parseInt(input.value, 10) || 0;
-            input.hidden = true;
-            if (n !== 0) {
-                valor.textContent = (n > 0 ? '+' : '') + n;
-                valor.hidden = false;
-                boton.hidden = true;
-            } else {
-                valor.hidden = true;
-                boton.hidden = false;
-            }
-        }
+        const labelFeliz  = grupo.querySelector('label[data-extra-doble="feliz"]');
+        const labelTriste = grupo.querySelector('label[data-extra-doble="triste"]');
+        const contexto = { grupo, input, badge };
 
-        function abrirEdicion() {
-            boton.hidden = true;
-            valor.hidden = true;
-            input.hidden = false;
-            input.focus();
-            input.select();
-        }
-
-        boton.addEventListener('dblclick', abrirEdicion);
-        valor.addEventListener('dblclick', abrirEdicion);
-        input.addEventListener('blur', function () {
-            mostrarSegunValor();
-            calcularTotalesPlanilla();
-        });
-        input.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
+        if (labelFeliz) {
+            labelFeliz.addEventListener('dblclick', function (e) {
                 e.preventDefault();
-                input.blur();
-            }
+                abrirModalExtra(Object.assign({ signo: 'positivo' }, contexto));
+            });
+        }
+        if (labelTriste) {
+            labelTriste.addEventListener('dblclick', function (e) {
+                e.preventDefault();
+                abrirModalExtra(Object.assign({ signo: 'negativo' }, contexto));
+            });
+        }
+        badge.addEventListener('dblclick', function () {
+            const actual = parseInt(input.value, 10) || 0;
+            abrirModalExtra(Object.assign({ signo: actual < 0 ? 'negativo' : 'positivo' }, contexto));
         });
-
-        mostrarSegunValor();
     });
+}
+
+function abrirModalExtra(contexto) {
+    extraContexto = contexto;
+    const modal = document.getElementById('modal-extra');
+    const titulo = document.getElementById('modal-extra-titulo');
+    const ayuda = document.getElementById('modal-extra-ayuda');
+    const campoValor = document.getElementById('modal-extra-valor');
+    const btnQuitar = document.getElementById('modal-extra-quitar');
+    if (!modal || !campoValor) return;
+
+    const actual = parseInt(contexto.input.value, 10) || 0;
+
+    if (contexto.signo === 'positivo') {
+        titulo.textContent = 'Puntos extra · Carita feliz';
+        ayuda.textContent = 'Se suman al total de esta categoría (ej. 10, 15).';
+    } else {
+        titulo.textContent = 'Puntos extra · Carita triste';
+        ayuda.textContent = 'Se restan del total de esta categoría (ej. 10, 15).';
+    }
+
+    campoValor.value = actual !== 0 ? Math.abs(actual) : '';
+    if (btnQuitar) btnQuitar.hidden = (actual === 0);
+
+    modal.classList.add('abierto');
+    setTimeout(function () {
+        campoValor.focus();
+        campoValor.select();
+    }, 0);
+}
+
+function cerrarModalExtra() {
+    const modal = document.getElementById('modal-extra');
+    if (modal) modal.classList.remove('abierto');
+    extraContexto = null;
+}
+
+function aplicarValorExtra(valor) {
+    if (!extraContexto) return;
+    const { input, badge, grupo } = extraContexto;
+    input.value = valor;
+    badge.classList.remove('extra-positivo', 'extra-negativo');
+    if (valor !== 0) {
+        badge.textContent = (valor > 0 ? '+' : '') + valor;
+        badge.classList.add(valor > 0 ? 'extra-positivo' : 'extra-negativo');
+        badge.hidden = false;
+        grupo.hidden = true;
+    } else {
+        badge.hidden = true;
+        badge.textContent = '';
+        grupo.hidden = false;
+    }
+    calcularTotalesPlanilla();
+}
+
+function guardarExtraModal() {
+    if (!extraContexto) return;
+    const campoValor = document.getElementById('modal-extra-valor');
+    const magnitud = Math.abs(parseInt(campoValor.value, 10) || 0);
+    if (magnitud <= 0) {
+        campoValor.focus();
+        return;
+    }
+    const valor = extraContexto.signo === 'positivo' ? magnitud : -magnitud;
+
+    // La carita seleccionada debe ser coherente con el signo del extra.
+    const estadoDeseado = extraContexto.signo === 'positivo' ? 'feliz' : 'triste';
+    const radio = extraContexto.grupo.querySelector('input[type=radio][value="' + estadoDeseado + '"]');
+    if (radio) radio.checked = true;
+
+    aplicarValorExtra(valor);
+    cerrarModalExtra();
+}
+
+function quitarExtraModal() {
+    aplicarValorExtra(0);
+    cerrarModalExtra();
 }
 
 /* ------------------------------- Planilla: totales en vivo ------------------------------ */
@@ -134,6 +202,18 @@ document.addEventListener('DOMContentLoaded', function () {
         tabla.addEventListener('change', calcularTotalesPlanilla);
         tabla.addEventListener('input', calcularTotalesPlanilla);
         calcularTotalesPlanilla();
+    }
+
+    const campoExtra = document.getElementById('modal-extra-valor');
+    if (campoExtra) {
+        campoExtra.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                guardarExtraModal();
+            } else if (e.key === 'Escape') {
+                cerrarModalExtra();
+            }
+        });
     }
 
     // Aviso (no bloqueante) si la fecha elegida en la planilla no es sábado

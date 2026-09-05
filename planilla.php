@@ -87,7 +87,7 @@ require_once __DIR__ . '/includes/header.php';
         <span>Feliz = +1</span>
         <span>Neutral = 0</span>
         <span>Triste = −1</span>
-        <span>En Calendario, Devocional, Audio Devocional, Comportamiento y Fallas, haz doble clic en el + para agregar puntos extra (opcional).</span>
+        <span>En Calendario, Devocional, Audio Devocional, Comportamiento y Fallas: doble clic en la carita feliz o triste agrega puntos extra (opcional).</span>
     </div>
 
     <div class="tabla-wrap">
@@ -108,30 +108,34 @@ require_once __DIR__ . '/includes/header.php';
                         <?php foreach ($categorias as $cat):
                             $prev = $registrosPrevios[$nina['id']][$cat['id']] ?? null;
                             $estadoActual = $prev['estado'] ?? 'neutral';
-                            $extraActual  = $prev['puntos_extra'] ?? 0;
+                            $extraActual  = (int) ($prev['puntos_extra'] ?? 0);
                             $campo = 'r_' . $nina['id'] . '_' . $cat['id'];
                             $tieneExtra = in_array($cat['nombre'], $categoriasConExtra, true);
+                            $extraClase = $extraActual > 0 ? 'extra-positivo' : ($extraActual < 0 ? 'extra-negativo' : '');
+                            $extraTexto = $extraActual !== 0 ? (($extraActual > 0 ? '+' : '') . $extraActual) : '';
                         ?>
                             <td class="celda-categoria">
-                                <div class="caritas-grupo" data-grupo-carita>
-                                    <?php foreach (['feliz' => '😊', 'neutral' => '😐', 'triste' => '😞'] as $valor => $emoji): ?>
-                                        <input type="radio" id="<?= $campo ?>_<?= $valor ?>"
-                                               name="estado[<?= (int) $nina['id'] ?>][<?= (int) $cat['id'] ?>]"
-                                               value="<?= $valor ?>" <?= $estadoActual === $valor ? 'checked' : '' ?>
-                                               data-puntos="<?= $valor === 'feliz' ? 1 : ($valor === 'triste' ? -1 : 0) ?>">
-                                        <label for="<?= $campo ?>_<?= $valor ?>" title="<?= ucfirst($valor) ?>"><?= $emoji ?></label>
-                                    <?php endforeach; ?>
-                                </div>
-                                <?php if ($tieneExtra): ?>
-                                    <div class="extra-wrap" data-extra-wrap>
-                                        <button type="button" class="btn-extra-toggle" data-extra-toggle
-                                                title="Doble clic para agregar puntos extra" aria-label="Agregar puntos extra">+</button>
-                                        <input type="number" class="input-extra" placeholder="0"
-                                               name="extra[<?= (int) $nina['id'] ?>][<?= (int) $cat['id'] ?>]"
-                                               value="<?= (int) $extraActual ?>" data-extra hidden>
-                                        <span class="extra-valor" data-extra-valor hidden></span>
+                                <div class="celda-calificacion" data-celda data-tiene-extra="<?= $tieneExtra ? '1' : '0' ?>">
+                                    <div class="caritas-grupo" data-grupo-carita <?= ($tieneExtra && $extraActual !== 0) ? 'hidden' : '' ?>>
+                                        <?php foreach (['feliz' => '😊', 'neutral' => '😐', 'triste' => '😞'] as $valor => $emoji):
+                                            $conDoble = $tieneExtra && $valor !== 'neutral';
+                                            $titulo = $conDoble ? ucfirst($valor) . ' (doble clic para puntos extra)' : ucfirst($valor);
+                                        ?>
+                                            <input type="radio" id="<?= $campo ?>_<?= $valor ?>"
+                                                   name="estado[<?= (int) $nina['id'] ?>][<?= (int) $cat['id'] ?>]"
+                                                   value="<?= $valor ?>" <?= $estadoActual === $valor ? 'checked' : '' ?>
+                                                   data-puntos="<?= $valor === 'feliz' ? 1 : ($valor === 'triste' ? -1 : 0) ?>">
+                                            <label for="<?= $campo ?>_<?= $valor ?>" title="<?= h($titulo) ?>"
+                                                   <?= $conDoble ? 'data-extra-doble="' . $valor . '"' : '' ?>><?= $emoji ?></label>
+                                        <?php endforeach; ?>
                                     </div>
-                                <?php endif; ?>
+                                    <?php if ($tieneExtra): ?>
+                                        <input type="number" name="extra[<?= (int) $nina['id'] ?>][<?= (int) $cat['id'] ?>]"
+                                               value="<?= $extraActual ?>" data-extra hidden>
+                                        <button type="button" class="extra-valor <?= $extraClase ?>" data-extra-valor
+                                                title="Doble clic para editar los puntos extra" <?= $extraActual === 0 ? 'hidden' : '' ?>><?= h($extraTexto) ?></button>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         <?php endforeach; ?>
                         <td class="celda-categoria"><strong data-total-nina>0</strong></td>
@@ -145,6 +149,24 @@ require_once __DIR__ . '/includes/header.php';
         <button type="submit" class="btn btn-vino">Guardar planilla</button>
     </div>
 </form>
+
+<!-- ---------------------------- Modal de puntos extra ---------------------------- -->
+<div class="modal-fondo" id="modal-extra">
+    <div class="modal-caja modal-caja-chica">
+        <button type="button" class="modal-cerrar" onclick="cerrarModalExtra()">&times;</button>
+        <h2 id="modal-extra-titulo">Puntos extra</h2>
+        <p class="modal-extra-ayuda" id="modal-extra-ayuda"></p>
+        <div class="campo">
+            <label for="modal-extra-valor">¿Cuántos puntos?</label>
+            <input type="number" id="modal-extra-valor" min="1" inputmode="numeric" placeholder="Ej. 10">
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
+            <button type="button" class="btn btn-suave" id="modal-extra-quitar" onclick="quitarExtraModal()" hidden>Quitar</button>
+            <button type="button" class="btn btn-suave" onclick="cerrarModalExtra()">Cancelar</button>
+            <button type="button" class="btn btn-vino" onclick="guardarExtraModal()">Guardar</button>
+        </div>
+    </div>
+</div>
 
 <?php endif; ?>
 
