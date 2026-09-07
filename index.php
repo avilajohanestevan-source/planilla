@@ -21,6 +21,11 @@ require_once __DIR__ . '/includes/header.php';
         <p>Registra versículo, devocional, puntualidad, apuntes, calendario, comportamiento y fallas del ensayo de este sábado.</p>
     </a>
 
+    <a href="puntaje.php" class="tarjeta-accion acento-dorado">
+        <h2>Puntaje</h2>
+        <p>Consulta el ranking general de caritas y el ranking por cada categoría de la planilla.</p>
+    </a>
+
     <a href="ninas.php" class="tarjeta-accion acento-vino">
         <h2>Niñas y Cargos</h2>
         <p>Agrega o edita la información de las niñas y administra los cargos que se les delegan.</p>

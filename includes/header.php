@@ -1,7 +1,7 @@
 <?php
 /**
  * Encabezado común. Cada página debe definir $paginaActual antes de incluir
- * este archivo ('inicio' | 'planilla' | 'ninas') y opcionalmente $tituloPagina.
+ * este archivo ('inicio' | 'planilla' | 'puntaje' | 'ninas') y opcionalmente $tituloPagina.
  */
 if (!isset($paginaActual)) {
     $paginaActual = '';
@@ -24,5 +24,6 @@ if (!isset($paginaActual)) {
     <nav class="nav-simple">
         <a href="index.php" class="<?= $paginaActual === 'inicio' ? 'activo' : '' ?>">Inicio</a>
         <a href="planilla.php" class="<?= $paginaActual === 'planilla' ? 'activo' : '' ?>">Planilla</a>
+        <a href="puntaje.php" class="<?= $paginaActual === 'puntaje' ? 'activo' : '' ?>">Puntaje</a>
         <a href="ninas.php" class="<?= $paginaActual === 'ninas' ? 'activo' : '' ?>">Niñas y Cargos</a>
     </nav>
