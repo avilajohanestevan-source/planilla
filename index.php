@@ -26,6 +26,11 @@ require_once __DIR__ . '/includes/header.php';
         <p>Consulta el ranking general de caritas y el ranking por cada categoría de la planilla.</p>
     </a>
 
+    <a href="cronograma.php" class="tarjeta-accion acento-azul">
+        <h2>Cronograma</h2>
+        <p>Genera las fechas de jueves y domingo, elige quiénes pasan al altar y el uniforme de cada una.</p>
+    </a>
+
     <a href="ninas.php" class="tarjeta-accion acento-vino">
         <h2>Niñas y Cargos</h2>
         <p>Agrega o edita la información de las niñas y administra los cargos que se les delegan.</p>

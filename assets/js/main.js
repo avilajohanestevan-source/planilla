@@ -22,6 +22,7 @@ function abrirModalNina(id) {
         document.getElementById('nina_apellidos').value = nina.apellidos;
         document.getElementById('nina_fecha_nacimiento').value = nina.fecha_nacimiento || '';
         document.getElementById('nina_fecha_cumpleanos').value = nina.fecha_cumpleanos || '';
+        document.getElementById('nina_puede_altar').checked = (nina.puede_altar !== 0);
         (nina.cargos || []).forEach(cargoId => {
             const chk = document.querySelector('.chk-cargo[value="' + cargoId + '"]');
             if (chk) chk.checked = true;
@@ -50,7 +51,50 @@ document.addEventListener('click', function (e) {
     if (modalExtra && e.target === modalExtra) {
         cerrarModalExtra();
     }
+    const modalCronograma = document.getElementById('modal-cronograma');
+    if (modalCronograma && e.target === modalCronograma) {
+        cerrarModalCronograma();
+    }
 });
+
+/* ------------------------------- Modal de cronograma ------------------------------ */
+function abrirModalCronograma(id) {
+    const modal = document.getElementById('modal-cronograma');
+    const form = document.getElementById('form-cronograma');
+    const titulo = document.getElementById('modal-cronograma-titulo');
+    if (!modal || !form || typeof DATOS_CRONOGRAMA === 'undefined' || !DATOS_CRONOGRAMA[id]) return;
+
+    const fecha = DATOS_CRONOGRAMA[id];
+    form.reset();
+    document.querySelectorAll('.chk-danzora').forEach(chk => chk.checked = false);
+
+    titulo.textContent = fecha.fecha_bonita;
+    document.getElementById('cronograma_fecha_id').value = fecha.id;
+
+    (fecha.ninas || []).forEach(ninaId => {
+        const chk = document.querySelector('.chk-danzora[value="' + ninaId + '"]');
+        if (chk) chk.checked = true;
+    });
+
+    const select = document.getElementById('cronograma_uniforme_id');
+    if (select) select.value = fecha.uniforme_id || 0;
+    actualizarSwatchUniforme();
+
+    modal.classList.add('abierto');
+}
+
+function cerrarModalCronograma() {
+    const modal = document.getElementById('modal-cronograma');
+    if (modal) modal.classList.remove('abierto');
+}
+
+function actualizarSwatchUniforme() {
+    const select = document.getElementById('cronograma_uniforme_id');
+    const swatch = document.getElementById('uniforme-preview-swatch');
+    if (!select || !swatch) return;
+    const opcion = select.options[select.selectedIndex];
+    swatch.style.background = opcion ? (opcion.dataset.color || 'transparent') : 'transparent';
+}
 
 function mostrarEdadCalculada() {
     const input = document.getElementById('nina_fecha_nacimiento');

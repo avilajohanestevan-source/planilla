@@ -10,7 +10,7 @@ $cargos = $pdo->query('SELECT id, nombre, descripcion FROM cargos ORDER BY nombr
 
 // --- Todas las niñas (activas e inactivas) ---
 $ninas = $pdo->query(
-    'SELECT id, nombres, apellidos, fecha_nacimiento, fecha_cumpleanos, activa
+    'SELECT id, nombres, apellidos, fecha_nacimiento, fecha_cumpleanos, activa, puede_altar
      FROM ninas ORDER BY activa DESC, nombres, apellidos'
 )->fetchAll();
 
@@ -36,6 +36,7 @@ foreach ($ninas as $n) {
         'apellidos' => $n['apellidos'],
         'fecha_nacimiento' => $n['fecha_nacimiento'],
         'fecha_cumpleanos' => $n['fecha_cumpleanos'],
+        'puede_altar' => (int) $n['puede_altar'],
         'cargos' => array_map(fn($c) => $c['id'], $cargosPorNina[$n['id']] ?? []),
     ];
 }
@@ -82,6 +83,7 @@ require_once __DIR__ . '/includes/header.php';
                         <th>Edad</th>
                         <th>Fecha nacimiento</th>
                         <th>Cumpleaños</th>
+                        <th class="celda-categoria">Altar</th>
                         <th>Cargos</th>
                         <th>Acciones</th>
                     </tr>
@@ -93,6 +95,13 @@ require_once __DIR__ . '/includes/header.php';
                             <td><?= calcularEdad($n['fecha_nacimiento']) ?> años</td>
                             <td><?= h(formatearFecha($n['fecha_nacimiento'])) ?></td>
                             <td><?= h(formatearFecha($n['fecha_cumpleanos'])) ?></td>
+                            <td class="celda-categoria">
+                                <?php if ((int) $n['puede_altar'] === 1): ?>
+                                    <span class="badge" style="background:var(--teal-suave);color:var(--teal-oscuro);">Sí</span>
+                                <?php else: ?>
+                                    <span class="badge" style="background:var(--fondo-alt);color:var(--texto-suave);">No</span>
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <?php if (empty($cargosPorNina[$n['id']])): ?>
                                     <span style="color:var(--texto-suave);font-size:13px;">Sin cargo</span>
@@ -213,6 +222,16 @@ require_once __DIR__ . '/includes/header.php';
                     <label for="nina_fecha_cumpleanos">Fecha de cumpleaños</label>
                     <input type="date" id="nina_fecha_cumpleanos" name="fecha_cumpleanos">
                 </div>
+            </div>
+
+            <div class="campo">
+                <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--texto);">
+                    <input type="checkbox" id="nina_puede_altar" name="puede_altar" value="1" style="width:auto;" checked>
+                    Puede pasar al altar
+                </label>
+                <p style="color:var(--texto-suave);font-size:12px;margin:4px 0 0;">
+                    Controla si aparece como candidata en el Cronograma. Igual eliges cuáles bailan cada fecha.
+                </p>
             </div>
 
             <div class="campo">

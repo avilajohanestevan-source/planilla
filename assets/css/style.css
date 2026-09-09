@@ -219,6 +219,7 @@ label {
 
 input[type=text],
 input[type=date],
+input[type=month],
 input[type=number],
 select,
 textarea {
@@ -546,3 +547,44 @@ tbody tr:hover { background: var(--fondo-alt); }
 @media (max-width: 640px) {
     .chart-caja { height: 300px; }
 }
+
+/* ------------------------------- Cronograma --------------------------------- */
+.tarjeta-accion.acento-azul .icono { color: var(--azul-cielo); }
+
+.color-input {
+    width: 100%;
+    height: 41px;
+    padding: 3px;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    background: var(--fondo-alt);
+    cursor: pointer;
+}
+
+.uniforme-swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.uniforme-select-fila {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.uniforme-select-fila select { width: auto; flex: 1; }
+.uniforme-select-fila .uniforme-swatch { width: 20px; height: 20px; flex-shrink: 0; }
+
+.danzoras-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.badge-dia-domingo { background: var(--vino-suave); color: var(--vino-oscuro); }
+.badge-dia-jueves  { background: var(--teal-suave); color: var(--teal-oscuro); }

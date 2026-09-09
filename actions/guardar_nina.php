@@ -13,6 +13,7 @@ $apellidos        = trim($_POST['apellidos'] ?? '');
 $fechaNacimiento  = $_POST['fecha_nacimiento'] ?? '';
 $fechaCumpleanos  = $_POST['fecha_cumpleanos'] ?? '';
 $cargos           = $_POST['cargos'] ?? [];
+$puedeAltar       = isset($_POST['puede_altar']) ? 1 : 0;
 
 if ($nombres === '' || $apellidos === '' || !DateTime::createFromFormat('Y-m-d', $fechaNacimiento)) {
     die('Faltan datos obligatorios (nombres, apellidos y fecha de nacimiento). <a href="../ninas.php">Volver</a>');
@@ -24,15 +25,15 @@ $pdo->beginTransaction();
 try {
     if ($id > 0) {
         $stmt = $pdo->prepare(
-            'UPDATE ninas SET nombres = ?, apellidos = ?, fecha_nacimiento = ?, fecha_cumpleanos = ? WHERE id = ?'
+            'UPDATE ninas SET nombres = ?, apellidos = ?, fecha_nacimiento = ?, fecha_cumpleanos = ?, puede_altar = ? WHERE id = ?'
         );
-        $stmt->execute([$nombres, $apellidos, $fechaNacimiento, $fechaCumpleanos, $id]);
+        $stmt->execute([$nombres, $apellidos, $fechaNacimiento, $fechaCumpleanos, $puedeAltar, $id]);
         $ninaId = $id;
     } else {
         $stmt = $pdo->prepare(
-            'INSERT INTO ninas (nombres, apellidos, fecha_nacimiento, fecha_cumpleanos) VALUES (?, ?, ?, ?)'
+            'INSERT INTO ninas (nombres, apellidos, fecha_nacimiento, fecha_cumpleanos, puede_altar) VALUES (?, ?, ?, ?, ?)'
         );
-        $stmt->execute([$nombres, $apellidos, $fechaNacimiento, $fechaCumpleanos]);
+        $stmt->execute([$nombres, $apellidos, $fechaNacimiento, $fechaCumpleanos, $puedeAltar]);
         $ninaId = $pdo->lastInsertId();
     }
 
