@@ -58,26 +58,29 @@ document.addEventListener('click', function (e) {
 });
 
 /* ------------------------------- Modal de cronograma ------------------------------ */
+// Cada semana (domingo a sábado) del Cronograma se edita en un solo modal:
+// las danzoras y el uniforme elegidos aplican al domingo y al jueves de esa
+// semana a la vez.
 function abrirModalCronograma(id) {
     const modal = document.getElementById('modal-cronograma');
     const form = document.getElementById('form-cronograma');
     const titulo = document.getElementById('modal-cronograma-titulo');
     if (!modal || !form || typeof DATOS_CRONOGRAMA === 'undefined' || !DATOS_CRONOGRAMA[id]) return;
 
-    const fecha = DATOS_CRONOGRAMA[id];
+    const semana = DATOS_CRONOGRAMA[id];
     form.reset();
     document.querySelectorAll('.chk-danzora').forEach(chk => chk.checked = false);
 
-    titulo.textContent = fecha.fecha_bonita;
-    document.getElementById('cronograma_fecha_id').value = fecha.id;
+    titulo.textContent = semana.titulo;
+    document.getElementById('cronograma_semana_id').value = semana.id;
 
-    (fecha.ninas || []).forEach(ninaId => {
+    (semana.ninas || []).forEach(ninaId => {
         const chk = document.querySelector('.chk-danzora[value="' + ninaId + '"]');
         if (chk) chk.checked = true;
     });
 
     const select = document.getElementById('cronograma_uniforme_id');
-    if (select) select.value = fecha.uniforme_id || 0;
+    if (select) select.value = semana.uniforme_id || 0;
     actualizarSwatchUniforme();
 
     modal.classList.add('abierto');
@@ -94,6 +97,46 @@ function actualizarSwatchUniforme() {
     if (!select || !swatch) return;
     const opcion = select.options[select.selectedIndex];
     swatch.style.background = opcion ? (opcion.dataset.color || 'transparent') : 'transparent';
+}
+
+/* ------------------- Cronograma: descargar imagen para WhatsApp ------------------- */
+function descargarCronogramaImagen() {
+    const nodo = document.getElementById('plantilla-whatsapp');
+    const boton = document.getElementById('btn-descargar-imagen');
+    if (!nodo || typeof html2canvas === 'undefined') {
+        alert('No se pudo generar la imagen. Verifica tu conexión a internet e inténtalo de nuevo.');
+        return;
+    }
+
+    if (boton) {
+        boton.disabled = true;
+        boton.textContent = 'Generando…';
+    }
+
+    // La plantilla vive oculta (display:none) para no estorbar en la
+    // pantalla normal; se muestra fuera de la vista justo antes de
+    // capturarla y se vuelve a ocultar al terminar.
+    nodo.style.display = 'block';
+
+    html2canvas(nodo, { backgroundColor: '#ffffff', scale: 2, useCORS: true })
+        .then(function (canvas) {
+            const enlace = document.createElement('a');
+            enlace.download = (nodo.dataset.nombreArchivo || 'cronograma') + '.png';
+            enlace.href = canvas.toDataURL('image/png');
+            document.body.appendChild(enlace);
+            enlace.click();
+            document.body.removeChild(enlace);
+        })
+        .catch(function () {
+            alert('Ocurrió un error generando la imagen. Inténtalo de nuevo.');
+        })
+        .finally(function () {
+            nodo.style.display = 'none';
+            if (boton) {
+                boton.disabled = false;
+                boton.textContent = 'Descargar imagen';
+            }
+        });
 }
 
 function mostrarEdadCalculada() {

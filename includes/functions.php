@@ -120,3 +120,47 @@ function nombreMesAnio(string $mesYm): string
     }
     return nombreMes((int) $partes[1]) . ' ' . $partes[0];
 }
+
+/** Formatea una fecha como "06 de Septiembre" (sin nombre del día), para las filas del Cronograma agrupadas por semana. */
+function formatearFechaCorta(string $fechaYmd): string
+{
+    $d = DateTime::createFromFormat('Y-m-d', $fechaYmd);
+    if (!$d) {
+        return $fechaYmd;
+    }
+    return $d->format('d') . ' de ' . nombreMes((int) $d->format('n'));
+}
+
+/**
+ * El Cronograma se maneja por semana (domingo a sábado): a partir del domingo
+ * que abre la semana (YYYY-MM-DD), devuelve el jueves de esa misma semana
+ * (domingo + 4 días). Ese jueves comparte danzoras y uniforme con su domingo.
+ */
+function juevesDeLaSemana(string $fechaDomingoYmd): string
+{
+    $d = DateTime::createFromFormat('Y-m-d', $fechaDomingoYmd);
+    if (!$d) {
+        return $fechaDomingoYmd;
+    }
+    $d->modify('+4 days');
+    return $d->format('Y-m-d');
+}
+
+/**
+ * Título corto para identificar una semana del Cronograma (modal de edición y
+ * confirmaciones), ej. "Domingo 06 · Jueves 10 de Septiembre", o con los dos
+ * meses si el domingo y el jueves de esa semana caen en meses distintos.
+ */
+function tituloSemana(string $fechaDomingoYmd): string
+{
+    $jueves = juevesDeLaSemana($fechaDomingoYmd);
+    $dObj = DateTime::createFromFormat('Y-m-d', $fechaDomingoYmd);
+    $jObj = DateTime::createFromFormat('Y-m-d', $jueves);
+    if (!$dObj || !$jObj) {
+        return '';
+    }
+    if ($dObj->format('n') === $jObj->format('n')) {
+        return 'Domingo ' . $dObj->format('d') . ' · Jueves ' . $jObj->format('d') . ' de ' . nombreMes((int) $dObj->format('n'));
+    }
+    return 'Domingo ' . formatearFechaCorta($fechaDomingoYmd) . ' · Jueves ' . formatearFechaCorta($jueves);
+}
