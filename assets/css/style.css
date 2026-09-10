@@ -298,6 +298,27 @@ tbody td {
 
 tbody tr:hover { background: var(--fondo-alt); }
 
+/* La Planilla tiene muchas categorías y se desplaza horizontalmente en
+   pantallas normales — la columna "Nombre" queda fija a la izquierda al
+   mover la tabla, para no perder de vista qué niña se está calificando. */
+#tabla-planilla th:first-child,
+#tabla-planilla td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--fondo);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.06);
+}
+
+#tabla-planilla thead th:first-child {
+    background: var(--vino-suave);
+    z-index: 3;
+}
+
+#tabla-planilla tbody tr:hover td:first-child {
+    background: var(--fondo-alt);
+}
+
 .badge {
     display: inline-block;
     background: var(--teal-suave);

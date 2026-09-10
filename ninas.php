@@ -10,7 +10,7 @@ $cargos = $pdo->query('SELECT id, nombre, descripcion FROM cargos ORDER BY nombr
 
 // --- Todas las niñas (activas e inactivas) ---
 $ninas = $pdo->query(
-    'SELECT id, nombres, apellidos, fecha_nacimiento, fecha_cumpleanos, activa, puede_altar
+    'SELECT id, nombres, apellidos, apodo, fecha_nacimiento, fecha_cumpleanos, activa, puede_altar
      FROM ninas ORDER BY activa DESC, nombres, apellidos'
 )->fetchAll();
 
@@ -34,6 +34,7 @@ foreach ($ninas as $n) {
         'id' => $n['id'],
         'nombres' => $n['nombres'],
         'apellidos' => $n['apellidos'],
+        'apodo' => $n['apodo'],
         'fecha_nacimiento' => $n['fecha_nacimiento'],
         'fecha_cumpleanos' => $n['fecha_cumpleanos'],
         'puede_altar' => (int) $n['puede_altar'],
@@ -91,7 +92,12 @@ require_once __DIR__ . '/includes/header.php';
                 <tbody>
                     <?php foreach ($ninasActivas as $n): ?>
                         <tr>
-                            <td class="nombre-nina"><?= h($n['nombres'] . ' ' . $n['apellidos']) ?></td>
+                            <td class="nombre-nina">
+                                <?= h($n['nombres'] . ' ' . $n['apellidos']) ?>
+                                <?php if (!empty($n['apodo'])): ?>
+                                    <span style="display:block;font-weight:400;font-size:12px;color:var(--texto-suave);">Apodo en la planilla: «<?= h($n['apodo']) ?>»</span>
+                                <?php endif; ?>
+                            </td>
                             <td><?= calcularEdad($n['fecha_nacimiento']) ?> años</td>
                             <td><?= h(formatearFecha($n['fecha_nacimiento'])) ?></td>
                             <td><?= h(formatearFecha($n['fecha_cumpleanos'])) ?></td>
@@ -210,6 +216,14 @@ require_once __DIR__ . '/includes/header.php';
                     <label for="nina_apellidos">Apellidos</label>
                     <input type="text" id="nina_apellidos" name="apellidos" required maxlength="100">
                 </div>
+            </div>
+
+            <div class="campo">
+                <label for="nina_apodo">Apodo o diminutivo (opcional)</label>
+                <input type="text" id="nina_apodo" name="apodo" maxlength="100" placeholder="Ej. Karlita">
+                <p style="color:var(--texto-suave);font-size:12px;margin:4px 0 0;">
+                    Si lo llenas, este es el nombre que aparece en la columna "Nombre" de la Planilla. El nombre completo se sigue guardando igual.
+                </p>
             </div>
 
             <div class="fila-campos">

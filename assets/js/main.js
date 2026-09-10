@@ -20,6 +20,7 @@ function abrirModalNina(id) {
         document.getElementById('nina_id').value = nina.id;
         document.getElementById('nina_nombres').value = nina.nombres;
         document.getElementById('nina_apellidos').value = nina.apellidos;
+        document.getElementById('nina_apodo').value = nina.apodo || '';
         document.getElementById('nina_fecha_nacimiento').value = nina.fecha_nacimiento || '';
         document.getElementById('nina_fecha_cumpleanos').value = nina.fecha_cumpleanos || '';
         document.getElementById('nina_puede_altar').checked = (nina.puede_altar !== 0);

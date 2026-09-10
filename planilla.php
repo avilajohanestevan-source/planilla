@@ -24,7 +24,7 @@ if (!$ensayoId) {
 
 // --- Niñas activas ---
 $ninas = $pdo->query(
-    "SELECT id, nombres, apellidos FROM ninas WHERE activa = 1 ORDER BY nombres, apellidos"
+    "SELECT id, nombres, apellidos, apodo FROM ninas WHERE activa = 1 ORDER BY nombres, apellidos"
 )->fetchAll();
 
 // --- Categorías activas, en el orden de la planilla original ---
@@ -102,9 +102,12 @@ require_once __DIR__ . '/includes/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($ninas as $nina): ?>
+                <?php foreach ($ninas as $nina):
+                    $nombreCompletoNina = $nina['nombres'] . ' ' . $nina['apellidos'];
+                    $nombreEnPlanilla = !empty($nina['apodo']) ? $nina['apodo'] : $nombreCompletoNina;
+                ?>
                     <tr data-fila-nina>
-                        <td class="nombre-nina"><?= h($nina['nombres'] . ' ' . $nina['apellidos']) ?></td>
+                        <td class="nombre-nina" title="<?= h($nombreCompletoNina) ?>"><?= h($nombreEnPlanilla) ?></td>
                         <?php foreach ($categorias as $cat):
                             $prev = $registrosPrevios[$nina['id']][$cat['id']] ?? null;
                             $estadoActual = $prev['estado'] ?? 'neutral';

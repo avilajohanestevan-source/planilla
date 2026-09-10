@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $id               = (int) ($_POST['id'] ?? 0);
 $nombres          = trim($_POST['nombres'] ?? '');
 $apellidos        = trim($_POST['apellidos'] ?? '');
+$apodo            = trim($_POST['apodo'] ?? '');
 $fechaNacimiento  = $_POST['fecha_nacimiento'] ?? '';
 $fechaCumpleanos  = $_POST['fecha_cumpleanos'] ?? '';
 $cargos           = $_POST['cargos'] ?? [];
@@ -20,20 +21,21 @@ if ($nombres === '' || $apellidos === '' || !DateTime::createFromFormat('Y-m-d',
 }
 
 $fechaCumpleanos = $fechaCumpleanos !== '' ? $fechaCumpleanos : null;
+$apodo = $apodo !== '' ? $apodo : null;
 
 $pdo->beginTransaction();
 try {
     if ($id > 0) {
         $stmt = $pdo->prepare(
-            'UPDATE ninas SET nombres = ?, apellidos = ?, fecha_nacimiento = ?, fecha_cumpleanos = ?, puede_altar = ? WHERE id = ?'
+            'UPDATE ninas SET nombres = ?, apellidos = ?, apodo = ?, fecha_nacimiento = ?, fecha_cumpleanos = ?, puede_altar = ? WHERE id = ?'
         );
-        $stmt->execute([$nombres, $apellidos, $fechaNacimiento, $fechaCumpleanos, $puedeAltar, $id]);
+        $stmt->execute([$nombres, $apellidos, $apodo, $fechaNacimiento, $fechaCumpleanos, $puedeAltar, $id]);
         $ninaId = $id;
     } else {
         $stmt = $pdo->prepare(
-            'INSERT INTO ninas (nombres, apellidos, fecha_nacimiento, fecha_cumpleanos, puede_altar) VALUES (?, ?, ?, ?, ?)'
+            'INSERT INTO ninas (nombres, apellidos, apodo, fecha_nacimiento, fecha_cumpleanos, puede_altar) VALUES (?, ?, ?, ?, ?, ?)'
         );
-        $stmt->execute([$nombres, $apellidos, $fechaNacimiento, $fechaCumpleanos, $puedeAltar]);
+        $stmt->execute([$nombres, $apellidos, $apodo, $fechaNacimiento, $fechaCumpleanos, $puedeAltar]);
         $ninaId = $pdo->lastInsertId();
     }
 
