@@ -569,6 +569,16 @@ tbody tr:hover { background: var(--fondo-alt); }
     margin-right: 6px;
     vertical-align: middle;
     border: 1px solid rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+}
+
+/* El punto de color y el nombre del uniforme siempre van en una sola línea,
+   sin importar el nombre (antes "Dorado" y "Blanco" se veían distinto: uno
+   se partía en dos líneas y el otro no). */
+.uniforme-etiqueta {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
 .uniforme-select-fila {
@@ -606,6 +616,17 @@ tbody tr:hover { background: var(--fondo-alt); }
     margin: -8px 0 14px;
 }
 
+/* La columna "Semana" siempre ocupa 2 líneas (domingo + jueves), pero las
+   demás columnas a veces son de una sola línea ("Sin asignar", "Sin
+   definir", los botones). Con la alineación vertical por defecto de las
+   tablas (centrada) esas celdas más cortas quedaban flotando en la mitad de
+   la fila, viéndose despareja frente a la columna "Semana". Esta tabla
+   alinea todo arriba para que quede parejo sin importar cuántas líneas
+   tenga cada celda. */
+.tabla-cronograma tbody td {
+    vertical-align: top;
+}
+
 .fecha-semana-dia {
     display: flex;
     align-items: center;
@@ -632,32 +653,23 @@ tbody tr:hover { background: var(--fondo-alt); }
     color: var(--texto);
 }
 
+/* El logo (assets/img/logo.png) ya trae el nombre del ministerio, "Celestial
+   Dance" y el sello de Casa de Dios dibujados dentro de la imagen — por eso
+   aquí solo se muestra la imagen completa, sin volver a escribir el nombre
+   al lado. */
 .pw-header {
-    display: flex;
-    align-items: center;
-    gap: 18px;
+    text-align: center;
     padding-bottom: 18px;
     border-bottom: 3px solid var(--vino);
     margin-bottom: 18px;
 }
 
-.pw-logo { width: 78px; height: 78px; object-fit: contain; flex-shrink: 0; }
-
-.pw-nombre {
-    font-family: 'Quicksand', sans-serif;
-    font-weight: 700;
-    font-size: 27px;
-    color: var(--teal);
-    letter-spacing: .3px;
-    line-height: 1.15;
-}
-
-.pw-subtitulo {
-    font-family: 'Dancing Script', cursive;
-    font-weight: 700;
-    font-size: 24px;
-    color: var(--vino);
-    margin-top: 2px;
+.pw-logo {
+    display: block;
+    width: 420px;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
 }
 
 .pw-mes {
@@ -716,6 +728,13 @@ tbody tr:hover { background: var(--fondo-alt); }
     margin-right: 6px;
     vertical-align: middle;
     border: 1px solid rgba(0, 0, 0, .15);
+    flex-shrink: 0;
+}
+
+.pw-etiqueta {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
 .pw-vacio { color: var(--texto-suave); font-size: 12px; font-style: italic; }

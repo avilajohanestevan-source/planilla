@@ -144,7 +144,7 @@ require_once __DIR__ . '/includes/header.php';
         <div>
             <?php foreach ($uniformes as $u): ?>
                 <span class="badge" style="font-size:13px;padding:6px 8px 6px 10px;">
-                    <span class="uniforme-swatch" style="background:<?= h($u['color']) ?>;"></span><?= h($u['nombre']) ?>
+                    <span class="uniforme-etiqueta"><span class="uniforme-swatch" style="background:<?= h($u['color']) ?>;"></span><?= h($u['nombre']) ?></span>
                     <form method="post" action="actions/eliminar_uniforme.php" style="display:inline;" onsubmit="return confirm('¿Eliminar el uniforme «<?= h(addslashes($u['nombre'])) ?>»? Las semanas que lo tenían quedarán sin uniforme definido.');">
                         <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
                         <input type="hidden" name="mes" value="<?= h($mes) ?>">
@@ -173,7 +173,7 @@ require_once __DIR__ . '/includes/header.php';
     <?php else: ?>
         <p class="ayuda-descarga">Usa "Descargar imagen" para generar una imagen lista para enviar al grupo de WhatsApp del ministerio.</p>
         <div class="tabla-wrap">
-            <table>
+            <table class="tabla-cronograma">
                 <thead>
                     <tr>
                         <th>Semana</th>
@@ -211,18 +211,20 @@ require_once __DIR__ . '/includes/header.php';
                             </td>
                             <td>
                                 <?php if ($s['uniforme_id']): ?>
-                                    <span class="uniforme-swatch" style="background:<?= h($s['uniforme_color']) ?>;"></span><?= h($s['uniforme_nombre']) ?>
+                                    <span class="uniforme-etiqueta"><span class="uniforme-swatch" style="background:<?= h($s['uniforme_color']) ?>;"></span><?= h($s['uniforme_nombre']) ?></span>
                                 <?php else: ?>
                                     <span style="color:var(--texto-suave);font-size:13px;">Sin definir</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="acciones-fila">
-                                <button type="button" class="btn btn-suave btn-sm" onclick="abrirModalCronograma(<?= (int) $s['id'] ?>)">Editar</button>
-                                <form method="post" action="actions/eliminar_cronograma_fecha.php" onsubmit="return confirm('¿Eliminar la semana Domingo <?= h(addslashes(formatearFechaCorta($s['fecha_domingo']))) ?> · Jueves <?= h(addslashes(formatearFechaCorta($jueves))) ?> del cronograma?');" style="display:inline;">
-                                    <input type="hidden" name="id" value="<?= (int) $s['id'] ?>">
-                                    <input type="hidden" name="mes" value="<?= h($mes) ?>">
-                                    <button type="submit" class="btn btn-peligro btn-sm">Eliminar</button>
-                                </form>
+                            <td>
+                                <div class="acciones-fila">
+                                    <button type="button" class="btn btn-suave btn-sm" onclick="abrirModalCronograma(<?= (int) $s['id'] ?>)">Editar</button>
+                                    <form method="post" action="actions/eliminar_cronograma_fecha.php" onsubmit="return confirm('¿Eliminar la semana Domingo <?= h(addslashes(formatearFechaCorta($s['fecha_domingo']))) ?> · Jueves <?= h(addslashes(formatearFechaCorta($jueves))) ?> del cronograma?');" style="display:inline;">
+                                        <input type="hidden" name="id" value="<?= (int) $s['id'] ?>">
+                                        <input type="hidden" name="mes" value="<?= h($mes) ?>">
+                                        <button type="submit" class="btn btn-peligro btn-sm">Eliminar</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -283,11 +285,7 @@ require_once __DIR__ . '/includes/header.php';
 <!-- ------------------- Plantilla oculta: imagen para WhatsApp -------------------- -->
 <div id="plantilla-whatsapp" class="plantilla-whatsapp" data-nombre-archivo="<?= h($nombreArchivoImagen) ?>">
     <div class="pw-header">
-        <img src="assets/img/logo.png" alt="" class="pw-logo">
-        <div class="pw-titulos">
-            <div class="pw-nombre"><?= h(APP_NOMBRE) ?></div>
-            <div class="pw-subtitulo"><?= h(APP_SUBTITULO) ?></div>
-        </div>
+        <img src="assets/img/logo.png" alt="<?= h(APP_NOMBRE) ?>" class="pw-logo">
     </div>
     <div class="pw-mes">Cronograma de <?= h(nombreMesAnio($mes)) ?></div>
     <table class="pw-tabla">
@@ -319,7 +317,7 @@ require_once __DIR__ . '/includes/header.php';
                     </td>
                     <td>
                         <?php if ($s['uniforme_id']): ?>
-                            <span class="pw-swatch" style="background:<?= h($s['uniforme_color']) ?>;"></span><?= h($s['uniforme_nombre']) ?>
+                            <span class="pw-etiqueta"><span class="pw-swatch" style="background:<?= h($s['uniforme_color']) ?>;"></span><?= h($s['uniforme_nombre']) ?></span>
                         <?php else: ?>
                             <span class="pw-vacio">Sin definir</span>
                         <?php endif; ?>
