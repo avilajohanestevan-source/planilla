@@ -164,3 +164,122 @@ function tituloSemana(string $fechaDomingoYmd): string
     }
     return 'Domingo ' . formatearFechaCorta($fechaDomingoYmd) . ' · Jueves ' . formatearFechaCorta($jueves);
 }
+
+/* ---------------------------- Puntaje: ranking, ajustes y cierres ---------------------------- */
+
+/**
+ * Arma el ranking de niñas activas combinando dos fuentes:
+ *  - los registros reales de la planilla (una carita = un registro), y
+ *  - los ajustes manuales (totales que ya se tenían en papel, cargados de una
+ *    sola vez por niña+categoría, sin una fecha de ensayo real detrás).
+ * Ambas fuentes se filtran por el mismo rango de fechas (y, si se pide, la
+ * misma categoría) antes de sumarlas, para que un ajuste manual cuente igual
+ * que un registro real dentro de un periodo o de un cierre.
+ *
+ * Las niñas activas sin nada en el rango elegido aparecen igual, con todo en
+ * cero, para no "esconder" a nadie del ranking.
+ *
+ * @param int|null    $categoriaId Filtra a una sola categoría, o null para el ranking general (todas juntas).
+ * @param string|null $desde       Fecha mínima (YYYY-MM-DD) o null/'' para no limitar por abajo.
+ * @param string|null $hasta       Fecha máxima (YYYY-MM-DD) o null/'' para no limitar por arriba.
+ */
+function armarRanking(PDO $pdo, ?int $categoriaId, ?string $desde, ?string $hasta): array
+{
+    $condRegistros = [];
+    $paramRegistros = [];
+    if ($categoriaId) {
+        $condRegistros[] = 'r.categoria_id = ?';
+        $paramRegistros[] = $categoriaId;
+    }
+    if ($desde) {
+        $condRegistros[] = 'e.fecha >= ?';
+        $paramRegistros[] = $desde;
+    }
+    if ($hasta) {
+        $condRegistros[] = 'e.fecha <= ?';
+        $paramRegistros[] = $hasta;
+    }
+    $whereRegistros = $condRegistros ? ('WHERE ' . implode(' AND ', $condRegistros)) : '';
+
+    $condAjustes = [];
+    $paramAjustes = [];
+    if ($categoriaId) {
+        $condAjustes[] = 'a.categoria_id = ?';
+        $paramAjustes[] = $categoriaId;
+    }
+    if ($desde) {
+        $condAjustes[] = 'a.fecha >= ?';
+        $paramAjustes[] = $desde;
+    }
+    if ($hasta) {
+        $condAjustes[] = 'a.fecha <= ?';
+        $paramAjustes[] = $hasta;
+    }
+    $whereAjustes = $condAjustes ? ('WHERE ' . implode(' AND ', $condAjustes)) : '';
+
+    $sql = "
+        SELECT
+            n.id,
+            n.nombres,
+            n.apellidos,
+            COALESCE(SUM(x.feliz), 0) AS conteo_feliz,
+            COALESCE(SUM(x.neutral), 0) AS conteo_neutral,
+            COALESCE(SUM(x.triste), 0) AS conteo_triste,
+            COALESCE(SUM(x.extra), 0) AS puntos_extra,
+            COALESCE(SUM(x.feliz - x.triste + x.extra), 0) AS puntaje_total
+        FROM ninas n
+        LEFT JOIN (
+            SELECT
+                r.nina_id,
+                CASE WHEN r.estado = 'feliz' THEN 1 ELSE 0 END AS feliz,
+                CASE WHEN r.estado = 'neutral' THEN 1 ELSE 0 END AS neutral,
+                CASE WHEN r.estado = 'triste' THEN 1 ELSE 0 END AS triste,
+                r.puntos_extra AS extra
+            FROM registros r
+            JOIN ensayos e ON e.id = r.ensayo_id
+            $whereRegistros
+            UNION ALL
+            SELECT
+                a.nina_id,
+                a.conteo_feliz AS feliz,
+                a.conteo_neutral AS neutral,
+                a.conteo_triste AS triste,
+                a.puntos_extra AS extra
+            FROM ajustes_manuales a
+            $whereAjustes
+        ) x ON x.nina_id = n.id
+        WHERE n.activa = 1
+        GROUP BY n.id, n.nombres, n.apellidos
+        ORDER BY puntaje_total DESC, n.nombres ASC, n.apellidos ASC
+    ";
+    // Nota: MySQL/MariaDB no permite reutilizar dos alias agregados dentro de
+    // una expresión en ORDER BY (error 1247, 'reference to group function');
+    // por eso el total se calcula una sola vez como su propio alias
+    // (puntaje_total) y el ORDER BY lo referencia directo, sin combinarlo.
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(array_merge($paramRegistros, $paramAjustes));
+    $filas = $stmt->fetchAll();
+    foreach ($filas as &$fila) {
+        $fila['puntaje_total'] = (int) $fila['puntaje_total'];
+    }
+    unset($fila);
+    return $filas;
+}
+
+/** Fecha (YYYY-MM-DD) hasta donde llegó el último cierre de periodo, o null si nunca se ha cerrado uno. */
+function ultimoCierreHasta(PDO $pdo): ?string
+{
+    $valor = $pdo->query('SELECT MAX(fecha_hasta) FROM puntaje_cierres')->fetchColumn();
+    return $valor ?: null;
+}
+
+/** El día siguiente a una fecha (YYYY-MM-DD). */
+function diaSiguiente(string $fechaYmd): string
+{
+    $d = DateTime::createFromFormat('Y-m-d', $fechaYmd);
+    if (!$d) {
+        return $fechaYmd;
+    }
+    $d->modify('+1 day');
+    return $d->format('Y-m-d');
+}

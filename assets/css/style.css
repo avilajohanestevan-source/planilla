@@ -544,6 +544,33 @@ tbody tr:hover { background: var(--fondo-alt); }
 .puntaje-negativo { color: var(--triste); }
 .puntaje-cero { color: var(--texto-suave); }
 
+.aviso-periodo {
+    margin: 14px 0 0;
+    color: var(--texto-suave);
+    font-size: 13px;
+}
+
+.fila-campos-caritas {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.cierre-historial {
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 10px;
+}
+
+.cierre-historial + .cierre-historial { margin-top: 10px; }
+
+.cierre-historial summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--vino-oscuro);
+}
+
+.cierre-historial[open] summary { margin-bottom: 14px; }
+
 @media (max-width: 640px) {
     .chart-caja { height: 300px; }
 }
