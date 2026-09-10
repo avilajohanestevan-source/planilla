@@ -12,7 +12,6 @@ $nombres          = trim($_POST['nombres'] ?? '');
 $apellidos        = trim($_POST['apellidos'] ?? '');
 $apodo            = trim($_POST['apodo'] ?? '');
 $fechaNacimiento  = $_POST['fecha_nacimiento'] ?? '';
-$fechaCumpleanos  = $_POST['fecha_cumpleanos'] ?? '';
 $cargos           = $_POST['cargos'] ?? [];
 $puedeAltar       = isset($_POST['puede_altar']) ? 1 : 0;
 
@@ -20,7 +19,10 @@ if ($nombres === '' || $apellidos === '' || !DateTime::createFromFormat('Y-m-d',
     die('Faltan datos obligatorios (nombres, apellidos y fecha de nacimiento). <a href="../ninas.php">Volver</a>');
 }
 
-$fechaCumpleanos = $fechaCumpleanos !== '' ? $fechaCumpleanos : null;
+// El cumpleaños es siempre el mismo día y mes que la fecha de nacimiento —
+// se calcula aquí (no se confía en lo que mande el formulario) para que
+// quede correcto incluso si el campo oculto llegó vacío o desactualizado.
+$fechaCumpleanos = $fechaNacimiento;
 $apodo = $apodo !== '' ? $apodo : null;
 
 $pdo->beginTransaction();

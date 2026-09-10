@@ -22,13 +22,12 @@ function abrirModalNina(id) {
         document.getElementById('nina_apellidos').value = nina.apellidos;
         document.getElementById('nina_apodo').value = nina.apodo || '';
         document.getElementById('nina_fecha_nacimiento').value = nina.fecha_nacimiento || '';
-        document.getElementById('nina_fecha_cumpleanos').value = nina.fecha_cumpleanos || '';
         document.getElementById('nina_puede_altar').checked = (nina.puede_altar !== 0);
         (nina.cargos || []).forEach(cargoId => {
             const chk = document.querySelector('.chk-cargo[value="' + cargoId + '"]');
             if (chk) chk.checked = true;
         });
-        mostrarEdadCalculada();
+        actualizarDatosNacimiento();
     } else {
         titulo.textContent = 'Nueva niña';
         document.getElementById('nina_id').value = '';
@@ -140,21 +139,51 @@ function descargarCronogramaImagen() {
         });
 }
 
-function mostrarEdadCalculada() {
+const MESES_ES = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+/**
+ * El cumpleaños de una niña es, por definición, el mismo día y mes que su
+ * fecha de nacimiento — así que en vez de pedirlo aparte, se calcula solo
+ * cada vez que se elige la fecha de nacimiento: actualiza tanto la edad
+ * mostrada como el campo (de solo lectura) "Cumpleaños", con el mismo valor
+ * ISO guardado en un campo oculto para enviarlo con el formulario.
+ */
+function actualizarDatosNacimiento() {
     const input = document.getElementById('nina_fecha_nacimiento');
-    const salida = document.getElementById('edad-calculada');
-    if (!input || !salida || !input.value) {
-        if (salida) salida.textContent = '';
+    const salidaEdad = document.getElementById('edad-calculada');
+    const textoCumple = document.getElementById('nina_fecha_cumpleanos_texto');
+    const ocultoCumple = document.getElementById('nina_fecha_cumpleanos');
+
+    if (!input || !input.value) {
+        if (salidaEdad) salidaEdad.textContent = '';
+        if (textoCumple) textoCumple.value = '';
+        if (ocultoCumple) ocultoCumple.value = '';
         return;
     }
+
     const nacimiento = new Date(input.value + 'T00:00:00');
-    const hoy = new Date();
-    let edad = hoy.getFullYear() - nacimiento.getFullYear();
-    const m = hoy.getMonth() - nacimiento.getMonth();
-    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
-        edad--;
+
+    if (salidaEdad) {
+        const hoy = new Date();
+        let edad = hoy.getFullYear() - nacimiento.getFullYear();
+        const m = hoy.getMonth() - nacimiento.getMonth();
+        if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+            edad--;
+        }
+        salidaEdad.textContent = edad >= 0 ? ('Edad actual: ' + edad + ' años') : '';
     }
-    salida.textContent = edad >= 0 ? ('Edad actual: ' + edad + ' años') : '';
+
+    if (textoCumple) {
+        textoCumple.value = nacimiento.getDate() + ' de ' + MESES_ES[nacimiento.getMonth()];
+    }
+    if (ocultoCumple) {
+        // Mismo valor que la fecha de nacimiento: el día y el mes son lo único
+        // que importa del cumpleaños, y así siempre coinciden entre sí.
+        ocultoCumple.value = input.value;
+    }
 }
 
 /* ------------------------------- Planilla: puntos extra vía modal ------------------------------ */

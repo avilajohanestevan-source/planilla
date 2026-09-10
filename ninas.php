@@ -100,7 +100,7 @@ require_once __DIR__ . '/includes/header.php';
                             </td>
                             <td><?= calcularEdad($n['fecha_nacimiento']) ?> años</td>
                             <td><?= h(formatearFecha($n['fecha_nacimiento'])) ?></td>
-                            <td><?= h(formatearFecha($n['fecha_cumpleanos'])) ?></td>
+                            <td><?= $n['fecha_cumpleanos'] ? h(formatearFechaCorta($n['fecha_cumpleanos'])) : '—' ?></td>
                             <td class="celda-categoria">
                                 <?php if ((int) $n['puede_altar'] === 1): ?>
                                     <span class="badge" style="background:var(--teal-suave);color:var(--teal-oscuro);">Sí</span>
@@ -229,12 +229,13 @@ require_once __DIR__ . '/includes/header.php';
             <div class="fila-campos">
                 <div class="campo">
                     <label for="nina_fecha_nacimiento">Fecha de nacimiento</label>
-                    <input type="date" id="nina_fecha_nacimiento" name="fecha_nacimiento" required onchange="mostrarEdadCalculada()">
+                    <input type="date" id="nina_fecha_nacimiento" name="fecha_nacimiento" required onchange="actualizarDatosNacimiento()">
                     <div class="ayuda-edad" id="edad-calculada"></div>
                 </div>
                 <div class="campo">
-                    <label for="nina_fecha_cumpleanos">Fecha de cumpleaños</label>
-                    <input type="date" id="nina_fecha_cumpleanos" name="fecha_cumpleanos">
+                    <label for="nina_fecha_cumpleanos_texto">Cumpleaños</label>
+                    <input type="text" id="nina_fecha_cumpleanos_texto" readonly placeholder="Se calcula solo con la fecha de nacimiento">
+                    <input type="hidden" id="nina_fecha_cumpleanos" name="fecha_cumpleanos">
                 </div>
             </div>
 
